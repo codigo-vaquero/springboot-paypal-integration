@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,9 +32,12 @@ public class PaypalController{
 	}
 	
 	@GetMapping("/token")
-	public String getToken(){
-		log.error("(0)-ALT-getToken()");
-		return "token: " + paypalService.getAccessToken();
+	public ResponseEntity<MessageResponse> getToken(){
+		log.error("(0)-ALT-getToken()");	
+		
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(new MessageResponse(paypalService.getAccessToken()));
 	}
 	
 	/*Step 1 - To create a pyment this is the first step*/
@@ -56,7 +60,9 @@ public class PaypalController{
 		
 		//response.sendRedirect("http://localhost:4200/payments/result?value=" + orderCaptured.get("status").toString());
 		
-		return ResponseEntity.ok(new MessageResponse(orderCaptured.get("status").toString()));
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(new MessageResponse(orderCaptured.get("status").toString()));
 	}
 	
 	/*Step 3 - Finish if User rejects payment*/
@@ -66,13 +72,8 @@ public class PaypalController{
 		response.put("order", token);
 		response.put("status", "CANCELED");
 		
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(response);
 	}
 }
-
-/*
- * Flujo completo: primero se consume create, 
- * posteriormente redirigira de forma automatica a paypalweb, 
- * luego retornara una respuesta de aceptar o rechazar.
- * 
- */
